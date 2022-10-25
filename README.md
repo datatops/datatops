@@ -157,3 +157,13 @@ dt.create_project(
     project_creation_secret="my-secret",
 )
 ```
+
+## Usage example
+
+```python
+>>> from datatops import Datatops
+>>> dt = Datatops("http://localhost:5001")
+>>> proj = dt.create_project("my_project5")
+>>> proj.store({"a": 1, "b": 2})
+>>> proj.list_data()
+```

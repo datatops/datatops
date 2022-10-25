@@ -4,7 +4,11 @@ import json
 
 import requests
 
-from .config import ADMIN_KEY_HEADER, USER_KEY_HEADER, PROJECT_CREATION_SECRET_HEADER
+from .config import (
+    ADMIN_KEY_HEADER,
+    USER_KEY_HEADER,
+    PROJECT_CREATION_SECRET_HEADER,
+)
 
 
 class Project:

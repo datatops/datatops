@@ -10,7 +10,12 @@ import uuid
 
 from flask import Flask, request, jsonify
 
-from .config import ADMIN_KEY_HEADER, USER_KEY_HEADER, DATATOPS_TIMESTAMP_KEY, VERSION
+from .config import (
+    ADMIN_KEY_HEADER,
+    USER_KEY_HEADER,
+    DATATOPS_TIMESTAMP_KEY,
+    VERSION,
+)
 
 
 class DatatopsServerBackend(abc.ABC):
