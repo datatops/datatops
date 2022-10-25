@@ -1,4 +1,5 @@
 import abc
+import datetime
 import pathlib
 import random
 import string
@@ -16,6 +17,8 @@ USER_KEY_HEADER = "X-User-Key"
 ADMIN_KEY_HEADER = "X-Admin-Key"
 PROJECT_CREATION_SECRET_HEADER = "X-Project-Creation-Secret"
 
+DATATOPS_TIMESTAMP_KEY = "__datatops_timestamp_iso"
+
 
 class Project:
     """
@@ -24,7 +27,7 @@ class Project:
     """
 
     @staticmethod
-    def from_json(json_path: str):
+    def from_json(json_path: Union[str, pathlib.Path]):
         """
         Create a Project object from a json file.
 
@@ -122,6 +125,9 @@ class Project:
         elif self.user_key:
             headers[USER_KEY_HEADER] = self.user_key
 
+        # Merge the headers from the kwargs
+        headers.update(kwargs.pop("headers", {}))
+
         response = requests.get(url, headers=headers, **kwargs)
         return response.json()
 
@@ -141,6 +147,9 @@ class Project:
             headers[ADMIN_KEY_HEADER] = self.admin_key
         elif self.user_key:
             headers[USER_KEY_HEADER] = self.user_key
+
+        # Merge the headers from the kwargs
+        headers.update(kwargs.pop("headers", {}))
 
         response = requests.post(url, headers=headers, **kwargs)
         return response.json()
@@ -217,6 +226,7 @@ class Datatops:
 
         """
         headers = {}
+        headers.update(kwargs.pop("headers", {}))
         response = requests.get(url, headers=headers, **kwargs)
         return response.json()
 
@@ -232,6 +242,7 @@ class Datatops:
 
         """
         headers = {}
+        headers.update(kwargs.pop("headers", {}))
         response = requests.post(url, headers=headers, **kwargs)
         return response.json()
 
@@ -246,11 +257,13 @@ class Datatops:
             Project: The project.
 
         """
+        if isinstance(name, pathlib.Path) or name.endswith(".json"):
+            return Project.from_json(name, **kwargs)
+
         # Check if the project is in the cache.
-        cache_file = self._cache_location / f"{name}.json"
+        cache_file = self._cache_location / "projects" / f"{name}.json"
         if cache_file.exists():
-            with open(cache_file, "r") as f:
-                return Project.from_json(f.read())
+            return Project.from_json(cache_file)
 
         return Project(name=name, url=self._url, **kwargs)
 
@@ -272,13 +285,24 @@ class Datatops:
             json={"project": name},
             headers={PROJECT_CREATION_SECRET_HEADER: project_creation_secret},
         )
+        new_project = Project(
+            name=name,
+            url=self._url,
+            admin_key=res["data"]["admin_key"],
+            user_key=res["data"]["user_key"],
+        )
+
         if res["status"] == "success":
-            return Project(
-                name=name,
-                url=self._url,
-                admin_key=res["data"]["admin_key"],
-                user_key=res["data"]["user_key"],
-            )
+            try:
+                # Cache the project.
+                cache_file = self._cache_location / "projects" / f"{name}.json"
+                cache_file.parent.mkdir(parents=True, exist_ok=True)
+                with open(cache_file, "w") as f:
+                    f.write(new_project.to_json())
+            except Exception as e:
+                print(e)
+            return new_project
+
         else:
             raise Exception(res["message"])
 
@@ -353,8 +377,7 @@ class JSONFileBackend(DatatopsServerBackend):
     def __init__(self, path: pathlib.Path):
         path = pathlib.Path(path)
         self.path = path
-        if not self.path.exists():
-            self.path.mkdir(parents=True)
+        self.path.mkdir(parents=True, exist_ok=True)
 
     def _read_json(self, path: pathlib.Path):
         with open(path, "r") as f:
@@ -486,7 +509,6 @@ class JSONFileBackend(DatatopsServerBackend):
 
         """
         if self._project_exists(project):
-            print(user_key, admin_key)
             project_path = self.path / "projects.json"
             project_data = self._read_json(project_path)
             for p in project_data["projects"]:
@@ -510,7 +532,6 @@ class JSONFileBackend(DatatopsServerBackend):
 
         """
         if self._project_exists(project):
-            print(user_key, admin_key)
             project_path = self.path / "projects.json"
             project_data = self._read_json(project_path)
             for p in project_data["projects"]:
@@ -581,6 +602,7 @@ class DatatopsServer:
             bool: True if the data was stored.
 
         """
+        data[DATATOPS_TIMESTAMP_KEY] = datetime.datetime.now().isoformat()
         return self.backend.store(project, user_key, admin_key, data)
 
     def list_data(

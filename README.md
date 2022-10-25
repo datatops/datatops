@@ -34,7 +34,7 @@ The `project` variable has some important details:
 >
 ```
 
-You will never be provided the `admin_key` again, so make sure to save it somewhere safe. You will need it to read your data and manage the project later.
+You will never be shown the `admin_key` again, so make sure to save it somewhere safe. You will need it to read your data and manage the project later.
 
 **IMPORTANT!** By default, datatops will also store newly created projects in the `~/.config/datatops` directory. If you're not on your own computer, **STOP** what you're doing and run this NOW:
 
