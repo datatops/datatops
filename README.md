@@ -134,7 +134,7 @@ If you check all of the following boxes (or mostly all of them), then datatops i
 ## Starting a new server
 
 ```python
-from datatops import DatatopsServer, JSONFileBackend
+from datatops.server import DatatopsServer, JSONFileBackend
 
 DatatopsServer(JSONFileBackend(path="mock-projects")).run(port=5001)
 ```
