@@ -11,6 +11,19 @@ from .config import (
 )
 
 
+def _namespaced_url(url: str):
+    """
+    Make a URL a safe string for a directory name on disk.
+
+    """
+    return (
+        url.removeprefix("https://")
+        .removeprefix("http://")
+        .replace("/", "_")
+        .replace(":", "_")
+    )
+
+
 class Project:
     """
     A high-level class to manage data in a specific Project.
@@ -252,7 +265,12 @@ class Datatops:
             return Project.from_json(name, **kwargs)
 
         # Check if the project is in the cache.
-        cache_file = self._cache_location / "projects" / f"{name}.json"
+        cache_file = (
+            self._cache_location
+            / "projects"
+            / _namespaced_url(self._url)
+            / f"{name}.json"
+        )
         if cache_file.exists():
             return Project.from_json(cache_file)
 
@@ -286,7 +304,12 @@ class Datatops:
         if res["status"] == "success":
             try:
                 # Cache the project.
-                cache_file = self._cache_location / "projects" / f"{name}.json"
+                cache_file = (
+                    self._cache_location
+                    / "projects"
+                    / _namespaced_url(self._url)
+                    / f"{name}.json"
+                )
                 cache_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(cache_file, "w") as f:
                     f.write(new_project.to_json())
