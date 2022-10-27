@@ -21,7 +21,38 @@ In order to use Datatops, you will need to have two sets of credentials — a us
 
 There are two ways that you might get credentials for your Datatops database: (1) Your team may already have a project set up and they will give you the keys; or (2) you can create a new project and get brand new keys. If you already have keys, you can skip step 2.5. Otherwise, follow along below:
 
-## 2.5 Creating a new project
+## 2.5. Creating a new project
 
 You will need to install the Datatops Python library in order to create a new project. To follow along, see the tutorial on creating a new project [here](New-Projects.md).
 
+Once you have user credentials and a project name (that's all you'll need for a user-facing JavaScript app!), you can continue with step 3.
+
+## 3. Send data to Datatops with `fetch`
+
+You can use the following JS code to send data to the Datatops server:
+
+```js
+const PROJECT_NAME = "MyProject"
+const USER_KEY = "jnf9do2c"
+
+let myData = {
+    // Your application's payload goes here. This can be anything
+    "participantID": 42,
+    "responses": [
+        { "question": "favorite color", "answer": "blue" },
+        { "question": "breakfast food", "answer": "egg" },
+    ]
+}
+
+fetch("https://example-datatops.com/api/v1/projects/MyProject", {
+    method: "POST",
+    headers: {
+        "X-Datatops-User-Key": USER_KEY,
+        "Content-Type": "application/json",
+    },
+    body: JSON.stringify(myData)
+});
+```
+
+> Note: We are working on a JavaScript library; stay tuned!
+    
