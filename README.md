@@ -77,7 +77,7 @@ project.store({"name": "Jordan", "breakfast_juice": "grapefruit"})
 This example is most useful if your users are submitting data from a web app:
 
 ```javascript
-fetch("https://my-datatops-website.com/projects/my-survey", {
+fetch("https://my-datatops-website.com/api/v1/projects/my-survey", {
     method: "POST",
     headers: {
         "Content-Type": "application/json",
