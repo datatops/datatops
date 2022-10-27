@@ -18,4 +18,23 @@ Once you have installed datatops, you should be able to access it in a new Pytho
 
 ## Creating a new project
 
-...
+```python
+from datatops import Datatops
+
+dt = Datatops("https://datatops-example.com")
+project = dt.create_project("jordans-survey")
+```
+
+## Storing credentials
+
+By default, Datatops will save a copy of your credentials in `~/.config/datatops/projects`. That way, the next time you want to access data from that project, you can use the following code:
+
+```python
+project = dt.get_project("jordans-survey")
+```
+
+If you are not on your own laptop, or you need a copy of the credentials, you can save them like this:
+
+```python
+project.save_json("jordans-survey-credentials.json")
+```
