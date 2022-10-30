@@ -3,7 +3,7 @@
 <h1 align=center><b>d a t a t o p s</b></h1>
 </p>
 
-Datatops is a super-simple zero-auth zero-setup data storage and retrieval tool for small, low-traffic projects.
+Datatops is a super-simple zero-auth zero-setup data storage and retrieval tool for all kinds of projects.
 
 ## Overview
 
