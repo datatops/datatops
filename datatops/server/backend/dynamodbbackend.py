@@ -1,4 +1,6 @@
 import time
+import json
+from decimal import Decimal
 from typing import Dict, Optional, Union
 
 import boto3
@@ -10,6 +12,10 @@ from .backend import (
     generate_new_admin_key,
 )
 from ...config import DATATOPS_PRIMARY_KEY, DATATOPS_TIMESTAMP_KEY
+
+
+def _sanitize_item(item: dict) -> dict:
+    return json.loads(json.dumps(item), parse_float=Decimal)
 
 
 def _dynamodb_table_exists(table_name: str, client) -> bool:
@@ -204,7 +210,7 @@ class DynamoDBBackend(DatatopsServerBackend):
         data[DATATOPS_PRIMARY_KEY] = project
 
         # Store the data
-        self.data_table.put_item(Item=data)
+        self.data_table.put_item(Item=_sanitize_item(data))
 
         return True
 
