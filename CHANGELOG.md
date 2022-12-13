@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Fixes
+    - Support Python 3.8
+
 ## **0.2.1** (Dev 3 2022)
 
 -   Fixes
