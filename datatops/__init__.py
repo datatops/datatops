@@ -11,14 +11,32 @@ from .config import (
 )
 
 
+def _remove_prefix(string: str, prefix: str):
+    """
+    Remove a prefix from a string.
+
+    Arguments:
+        string (str): The string to remove the prefix from.
+        prefix (str): The prefix to remove.
+
+    Returns:
+        str: The string without the prefix.
+
+    """
+    if string.startswith(prefix):
+        return string[len(prefix) :]
+    return string
+
+
 def _namespaced_url(url: str):
     """
     Make a URL a safe string for a directory name on disk.
 
     """
     return (
-        url.removeprefix("https://")
-        .removeprefix("http://")
+        # url.removeprefix("https://")
+        # .removeprefix("http://")
+        _remove_prefix(_remove_prefix(url, "https://"), "http://")
         .replace("/", "_")
         .replace(":", "_")
     )
