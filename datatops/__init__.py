@@ -177,7 +177,12 @@ class Project:
         return response.json()
 
     # Data methods
-    def list_data(self, limit: Optional[int] = None) -> List[Dict]:
+    def list_data(
+        self,
+        limit: Optional[int] = None,
+        since: Optional[float] = None,
+        until: Optional[float] = None,
+    ) -> List[Dict]:
         """
         List all data for the project.
 
@@ -190,8 +195,10 @@ class Project:
         """
         # "/api/v1/projects/<project>",
         req = self._get(
-            f"{self.url}/api/v1/projects/{self.name}", params={"limit": limit}
+            f"{self.url}/api/v1/projects/{self.name}",
+            params={"limit": limit, "since": since, "until": until},
         )
+        print(req)
         if req["status"] == "success":
             return req["data"]
         else:

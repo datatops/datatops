@@ -220,6 +220,8 @@ class DynamoDBBackend(DatatopsServerBackend):
         user_key: Optional[str],
         admin_key: Optional[str],
         limit: Optional[int],
+        since: Optional[float],
+        until: Optional[float],
     ):
         """
         List data entries.
@@ -229,6 +231,8 @@ class DynamoDBBackend(DatatopsServerBackend):
             user_key (Optional[str]): User key
             admin_key (Optional[str]): Admin key
             limit (Optional[int]): Limit the number of results
+            since (Optional[int]): Timestamp to start from
+            until (Optional[int]): Timestamp to end at
 
         Returns:
             List[Dict]: List of data entries
@@ -238,11 +242,48 @@ class DynamoDBBackend(DatatopsServerBackend):
         if not self.is_authorized_to_read(project, user_key, admin_key):
             return []
 
-        res = self.data_table.query(
+        items = []
+
+        # Query the data table, using the since and until timestamps if provided
+        # and the limit
+        query = self.data_table.query(
             KeyConditionExpression=Key(DATATOPS_PRIMARY_KEY).eq(project),
-            **({"Limit": limit} if limit is not None else {}),
+            ScanIndexForward=False,
         )
-        return res["Items"]
+
+        items.extend(
+            [
+                i
+                for i in query["Items"]
+                if (since is None or i[DATATOPS_TIMESTAMP_KEY] >= since)
+                and (until is None or i[DATATOPS_TIMESTAMP_KEY] <= until)
+            ]
+        )
+
+        # If there are more items, keep querying until we have enough
+        while "LastEvaluatedKey" in query and (limit is None or len(items) < limit):
+            query = self.data_table.query(
+                KeyConditionExpression=Key(DATATOPS_PRIMARY_KEY).eq(project),
+                ScanIndexForward=False,
+                ExclusiveStartKey=query["LastEvaluatedKey"],
+            )
+            items.extend(
+                [
+                    i
+                    for i in query["Items"]
+                    if (since is None or i[DATATOPS_TIMESTAMP_KEY] >= since)
+                    and (until is None or i[DATATOPS_TIMESTAMP_KEY] <= until)
+                ]
+            )
+
+        print("Got item count = ", len(items))
+
+        # Check for the MB limit by converting to JSON
+        items_json = json.dumps(items, default=str).encode("utf-8")
+        if len(items_json) > 5 * 1024 * 1024:
+            return None
+
+        return items[:limit] if limit else items
 
     def list_projects(self):
         raise NotImplementedError()

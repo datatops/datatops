@@ -1,9 +1,14 @@
 # CHANGELOG
 
-## Unreleased
+## **0.3.0** (Jan 29 2025)
 
-- Fixes
-    - Support Python 3.8
+-   Features
+
+    -   Added pagination to the DynamoDB backend
+    -   Added since/until filters when listing data
+
+-   Fixes
+    -   Support Python 3.8
 
 ## **0.2.1** (Dev 3 2022)
 

@@ -2,6 +2,8 @@ import json
 import pathlib
 from typing import Dict, Optional, Union
 
+from datatops.config import DATATOPS_TIMESTAMP_KEY
+
 from .backend import (
     DatatopsServerBackend,
     generate_new_user_key,
@@ -107,6 +109,8 @@ class JSONFileBackend(DatatopsServerBackend):
         user_key: Optional[str],
         admin_key: Optional[str],
         limit: Optional[int],
+        since: Optional[float],
+        until: Optional[float],
     ):
         """
         List the data in a project.
@@ -116,6 +120,8 @@ class JSONFileBackend(DatatopsServerBackend):
             user_key (str): The user key.
             admin_key (str): The admin key.
             limit (int): The maximum number of records to return.
+            since (int): The timestamp to start from.
+            until (int): The timestamp to end at.
 
         Returns:
             list: The data records.
@@ -126,10 +132,16 @@ class JSONFileBackend(DatatopsServerBackend):
         ):
             project_path = self.path / (project + ".json")
             project_data = self._read_json(project_path)
+            filtered_records = [
+                record
+                for record in project_data["records"]
+                if (since is None or record[DATATOPS_TIMESTAMP_KEY] >= since)
+                and (until is None or record[DATATOPS_TIMESTAMP_KEY] <= until)
+            ]
             if limit is None:
-                return project_data["records"]
+                return filtered_records
             else:
-                return project_data["records"][:limit]
+                return filtered_records[:limit]
 
     def list_projects(self):
         """

@@ -43,6 +43,8 @@ class DatatopsServerBackend(abc.ABC):
         user_key: Optional[str],
         admin_key: Optional[str],
         limit: Optional[int],
+        since: Optional[float],
+        until: Optional[float],
     ):
         raise NotImplementedError
 

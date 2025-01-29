@@ -82,6 +82,8 @@ class DatatopsServer:
         user_key: Optional[str],
         admin_key: Optional[str],
         limit: Optional[int] = None,
+        since: Optional[float] = None,
+        until: Optional[float] = None,
     ):
         """
         List the data in a project.
@@ -91,12 +93,21 @@ class DatatopsServer:
             user_key (str): The user key.
             admin_key (str): The admin key.
             limit (int): The maximum number of records to return.
+            since (float): The timestamp to start from.
+            until (float): The timestamp to end at.
 
         Returns:
             list: The data records.
 
         """
-        return self.backend.list_data(project, user_key, admin_key, limit)
+        return self.backend.list_data(
+            project,
+            user_key,
+            admin_key,
+            limit,
+            since,
+            until,
+        )
 
     def _add_routes(self):
         """
@@ -189,9 +200,26 @@ class DatatopsServer:
         user_key = request.headers.get(USER_KEY_HEADER)
         admin_key = request.headers.get(ADMIN_KEY_HEADER)
         limit = request.args.get("limit")
+        since = request.args.get("since")
+        until = request.args.get("until")
         if limit is not None:
             limit = int(limit)
-        data = self.list_data(project, user_key, admin_key, limit)
+        if since is not None:
+            since = float(since)
+        if until is not None:
+            until = float(until)
+
+        data = self.list_data(project, user_key, admin_key, limit, since, until)
+        if data is None:
+            return (
+                jsonify(
+                    {
+                        "status": "error",
+                        "message": "Data too large. Try specifying a limit or since/until parameters.",
+                    }
+                ),
+                400,
+            )
         return jsonify(
             {
                 "data": data,
