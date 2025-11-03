@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## **0.3.1** (Jan 29 2025)
+
+-   Fixes
+    -   Remove spurious debug print
+
 ## **0.3.0** (Jan 29 2025)
 
 -   Features

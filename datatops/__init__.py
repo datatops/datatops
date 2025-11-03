@@ -198,7 +198,6 @@ class Project:
             f"{self.url}/api/v1/projects/{self.name}",
             params={"limit": limit, "since": since, "until": until},
         )
-        print(req)
         if req["status"] == "success":
             return req["data"]
         else:
